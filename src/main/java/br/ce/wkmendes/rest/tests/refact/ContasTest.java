@@ -13,7 +13,7 @@ public class ContasTest {
 	
 	@BeforeClass
 	public static void login() {
-		Map<String, String> login = new HashMap<>();
+		Map<String, String> login = new HashMap<String, String>();
 		login.put("email", "emailtestewilliam@emailteste.com");
 		login.put("senha", "0123456789");
 		
