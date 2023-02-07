@@ -1,35 +1,50 @@
 package br.ce.wkmendes.rest.tests.refact;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.*;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.junit.Test;
 
-import org.junit.BeforeClass;
+import br.ce.wkmendes.rest.core.BaseTest;
+import br.ce.wkmendes.rest.utils.AplicacaoRealUtils;
 
-import io.restassured.RestAssured;
-
-public class ContasTest {
+public class ContasTest extends BaseTest{
 	
-	@BeforeClass
-	public static void login() {
-		Map<String, String> login = new HashMap<String, String>();
-		login.put("email", "emailtestewilliam@emailteste.com");
-		login.put("senha", "0123456789");
-		
-		//Login na api e obtenção do token
-		String TOKEN = given()
-			.body(login)
+	@Test
+	public void testDeveIncluirContaComSucesso() {
+		given()
+			.body("{ \"nome\": \" Conta Inserida\" }")
 		.when()
-			.post("/signin")
+			.post("/contas")
+		.then()
+			.statusCode(201)
+		;
+	}
+	
+	@Test
+	public void testDeveAlterarContaComSucesso() {
+		Integer CONTA_ID = AplicacaoRealUtils.getIdContaPeloNome("Conta para alterar");
+		given()
+			.body("{ \"nome\": \"Conta alterada\" }")
+			.pathParam("id", CONTA_ID)
+		.when()
+			.put("/contas/{id}")
 		.then()
 			.statusCode(200)
-			.extract().path("token")
+			.body("nome", is("Conta alterada"))
 		;
-		
-		RestAssured.requestSpecification.header("Authorization", "JWT " + TOKEN);
-		
-		RestAssured.get("/reset").then().statusCode(200);
 	}
-
+	
+	@Test
+	public void testNaoDeveIncluirContaComSucesso() {
+		given()
+			.body("{ \"nome\": \"Conta mesmo nome\" }")
+		.when()
+			.post("/contas")
+		.then()
+			.statusCode(400)
+			.body("error", is("Já existe uma conta com esse nome!"))
+		;
+	}
+	
 }
